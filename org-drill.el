@@ -2054,12 +2054,16 @@ RESCHEDULE-FN is the function to reschedule."
              (org-display-inline-images t))
            (org-cycle-hide-drawers 'all)
            (org-remove-latex-fragment-image-overlays)
-           (save-excursion
-             (org-mark-subtree)
-             (let ((beg (region-beginning))
-                   (end (region-end)))
-               (org--latex-preview-region beg end))
-             (deactivate-mark))
+	   (save-excursion
+	     (org-mark-subtree)
+	     (let ((beg (region-beginning))
+		   (end (region-end)))
+	       (if (display-graphic-p)
+		   (org--latex-preview-region beg end)
+		 ;; Show raw LaTeX source in terminal
+		 (let ((latex-code (buffer-substring-no-properties beg end)))
+		   (put-text-property beg end 'display latex-code))))
+	     (deactivate-mark))
            (org-drill-with-hidden-cloze-hints
             (funcall reschedule-fn session))))))
 
