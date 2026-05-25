@@ -701,9 +701,15 @@ CMD is bound, or nil if it is not bound to a key."
 
 (defun org-drill-time-to-inactive-org-timestamp (time)
   "Convert TIME into org-mode timestamp."
-  (format-time-string
-   (concat "[" (substring (cdr org-time-stamp-formats) 1 -1) "]")
-   time))
+  ;; Org 9.6+ changed `org-time-stamp-formats' from "<%Y-%m-%d %a %H:%M>"
+  ;; (with angle brackets) to "%Y-%m-%d %a %H:%M" (without).
+  ;; Handle both formats to remain compatible across Org versions.
+  (let ((fmt (cdr org-time-stamp-formats)))
+    (format-time-string
+     (concat "["
+             (if (string-prefix-p "<" fmt) (substring fmt 1 -1) fmt)
+             "]")
+     time)))
 
 (defun org-drill-map-entries (func &optional scope drill-match &rest skip)
   "Like `org-map-entries', but only drill entries are processed."
